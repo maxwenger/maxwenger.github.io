@@ -19,7 +19,7 @@ profile:
 social:
   github: http://github.com/maxwenger/
   twitter: https://twitter.com/maxwellwenger/
-  user-circle: http://www.maxwellwenger.com/
+  address-card: http://www.maxwellwenger.com/
 
 # Build settings
 exclude: ["_screenshots", "Gemfile", "Gemfile.lock", "LICENSE.txt", "README.md"]
