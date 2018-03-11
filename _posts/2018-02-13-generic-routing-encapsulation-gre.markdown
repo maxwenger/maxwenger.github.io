@@ -10,10 +10,8 @@ image-sm: /assets/img/2018-02-13-generic-routing-encapsulation-gre/cover-sm.png
 ---
 This is a test.
 
-<pre>
 ```ruby
 require 'redcarpet'
 markdown = Redcarpet.new("Hello World!")
 puts markdown.to_html
 ```
-</pre>
