@@ -23,9 +23,9 @@ Notice how the tunnel interface is listed as any other interface. It has an IP a
 
 ```
 R1#show ip interface brief 
-Interface 			IP-Address	OK?	Method	Status	Protocol 
-GigabitEthernet0/0 	192.168.1.1	YES	manual	up		up
-Tunnel0 			10.0.0.1 	YES 	manual 	up 		up
+Interface 			    IP-Address   OK?  Method  Status  Protocol 
+GigabitEthernet0/0  192.168.1.1	 YES  manual  up      up
+Tunnel0             10.0.0.1     YES  manual  up      up
 ```
 
 Notice how there is only one hop. No matter how many hops there will be on the WAN, the other side of the GRE tunnel is only one hop away – the hops in the WAN aren’t even visible. It looks like the other side of the tunnel is just on the other end of a physical interface.
