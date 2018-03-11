@@ -14,7 +14,7 @@ default_img:
 
 # Profile settings
 name: Maxwell Wenger
-profile_img: "profile.png"
+profile_img: "/profile.png"
 profile: Maxwell Wenger was born in Bellevue, Washington and still lives close by. He is currently a Computer Science student, doing some ad hoc development and Cisco Networking training on the side.
 social:
   github: http://github.com/maxwenger/
