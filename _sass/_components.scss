@@ -382,7 +382,7 @@
 /**
  * Post
  */
-.post {
+.post, #disqus_thread {
   width: 90%;
   max-width: $mq-md;
   margin: 0 auto;
