@@ -14,7 +14,7 @@ default_img:
 
 # Profile settings
 name: Maxwell Wenger
-profile_img: /profile.png
+profile_img: "profile.png"
 profile: 
 social:
   github: http://github.com/maxwenger/
