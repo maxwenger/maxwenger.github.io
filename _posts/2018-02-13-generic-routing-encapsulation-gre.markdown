@@ -23,7 +23,7 @@ Notice how the tunnel interface is listed as any other interface. It has an IP a
 
 ```
 R1#show ip interface brief 
-Interface 			    IP-Address   OK?  Method  Status  Protocol 
+Interface           IP-Address   OK?  Method  Status  Protocol 
 GigabitEthernet0/0  192.168.1.1	 YES  manual  up      up
 Tunnel0             10.0.0.1     YES  manual  up      up
 ```
