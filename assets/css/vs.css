@@ -1,5 +1,9 @@
 .highlight .hll { background-color: #ffffcc }
-.highlight  { background: #ffffff; }
+.highlight  { 
+  background: #ffffff;
+  border: thick #0a0a0a;
+  padding: 2px;
+}
 .highlight .c { color: #008000 } /* Comment */
 .highlight .err { border: 1px solid #FF0000 } /* Error */
 .highlight .k { color: #0000ff } /* Keyword */
