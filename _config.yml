@@ -4,6 +4,11 @@ baseurl: ""
 paginate: 5
 paginate_path: "/blog/page-:num"
 google_analytics: UA-93216105-2
+defaults:
+  - scope:
+      path: "assets/img"
+    values:
+      image: true
 
 # SEO settings
 title: Notes from Max
