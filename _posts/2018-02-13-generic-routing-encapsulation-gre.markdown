@@ -10,6 +10,6 @@ image-sm: /assets/img/2018-02-13-generic-routing-encapsulation-gre/cover-sm.png
 ---
 This is a test.
 
-<pre>
+<pre><code>
 Test!
-</pre>
+</code></pre>
