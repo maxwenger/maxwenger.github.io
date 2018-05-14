@@ -1,0 +1,41 @@
+# Site settings
+email: max@maxwellwenger.com
+baseurl: ""
+paginate: 5
+paginate_path: "/blog/page-:num"
+google_analytics: UA-93216105-2
+defaults:
+  - scope:
+      path: "assets/img"
+    values:
+      image: true
+
+# SEO settings
+title: Notes from Max
+description: Max Wenger's thoughts on programming and networking.
+url: "http://www.maxwenger.com"
+twitter_username: maxwenger
+default_img: 
+
+# Profile settings
+name: Maxwell Wenger
+profile_img: "/profile.png"
+profile: Maxwell Wenger was born in Bellevue, Washington, and still lives close by. He is currently a student studying Computer Science, doing some ad hoc development and some Cisco Networking training on the side.
+social:
+  github: http://github.com/maxwenger/
+  linkedin: https://www.linkedin.com/in/maxwell-wenger/
+  twitter: https://twitter.com/maxwellwenger/
+
+# Build settings
+exclude: ["_screenshots", "Gemfile", "Gemfile.lock", "LICENSE.txt", "README.md"]
+include: ["_categories"]
+markdown: kramdown
+highlighter: rouge
+permalink: /:year/:month/:day/:title/
+
+# Sass
+sass:
+  style: compressed
+
+# Gems
+gems: [jekyll-paginate, jekyll-sitemap, octopress-autoprefixer]

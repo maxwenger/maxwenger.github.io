@@ -1,0 +1,18 @@
+version: '2'
+services:
+  site:
+    image: jekyll/jekyll:latest
+    volumes:
+      - ./trophy-jekyll:/srv/jekyll
+      - ./custom/assets/css/vs.css:/srv/jekyll/assets/css/vs.css
+      - ./custom/assets/img:/srv/jekyll/assets/img
+      - ./custom/CNAME:/srv/jekyll/CNAME
+      - ./custom/_config.yml:/srv/jekyll/_config.yml
+      - ./custom/_layouts/post.html:/srv/jekyll/_layouts/post.html
+      - ./custom/_posts:/srv/jekyll/_posts
+      - ./custom/profile.png:/srv/jekyll/profile.png
+      - ./custom/_sass/_base.scss:/srv/jekyll/_sass/_base.scss
+      - ./custom/_sass/_components.scss:/srv/jekyll/_sass/_components.scss
+    command: jekyll serve
+    ports:
+      - 4000:4000
