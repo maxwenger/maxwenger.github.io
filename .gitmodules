@@ -1,0 +1,3 @@
+[submodule "trophy-jekyll"]
+	path = trophy-jekyll
+	url = https://github.com/thomasvaeth/trophy-jekyll
