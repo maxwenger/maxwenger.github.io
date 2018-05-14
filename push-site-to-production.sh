@@ -1,9 +1,9 @@
 #!/bin/bash
 
 JEKYLL-DIR=./trophy-jekyll
-COMMIT-MESSAGE='Pushed to production.'
-REMOTE-REPOSITORY-URL='https://github.com/maxwenger/maxwenger.github.io'
-PRODUCTION-BRANCH='gh-pages'
+COMMIT-MESSAGE="Pushed to production."
+REMOTE-REPOSITORY-URL="https://github.com/maxwenger/maxwenger.github.io"
+PRODUCTION-BRANCH="gh-pages"
 
 read -p "Are you sure you want to push this site to production? [yN] " -n 1 -r
 echo # (optional) move to a new line
