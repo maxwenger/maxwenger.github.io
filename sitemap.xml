@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>http://www.maxwenger.com/2018/06/14/policy-based-routing-pbr/</loc>
+<lastmod>2018-06-14T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>http://www.maxwenger.com/2018/05/12/vrf-lite/</loc>
+<lastmod>2018-05-12T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>http://www.maxwenger.com/2018/02/13/generic-routing-encapsulation-gre/</loc>
+<lastmod>2018-02-13T00:00:00-06:00</lastmod>
+</url>
+<url>
+<loc>http://www.maxwenger.com/archive/</loc>
+</url>
+<url>
+<loc>http://www.maxwenger.com/</loc>
+</url>
+<url>
+<loc>http://www.maxwenger.com/category/networking/</loc>
+</url>
+<url>
+<loc>http://www.maxwenger.com/category/routing/</loc>
+</url>
+<url>
+<loc>http://www.maxwenger.com/category/vpn/</loc>
+</url>
+</urlset>

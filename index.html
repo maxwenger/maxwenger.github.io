@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Notes from Max</title>
+  <meta name="author" content="Maxwell Wenger">
+  <meta name="description" content="Max Wenger's thoughts on programming and networking.">
+  <meta property="og:title" content="Notes from Max">
+  <meta property="og:url" content="http://www.maxwenger.com/">
+  <meta property="og:site_name" content="Notes from Max">
+  <meta property="og:description" content="Max Wenger's thoughts on programming and networking.">
+  <meta property="og:image" content="">
+  <meta property="og:type" content="blog">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:description" content="Max Wenger's thoughts on programming and networking.">
+  <meta name="twitter:title" content="Notes from Max">
+  <meta name="twitter:url" content="http://www.maxwenger.com/">
+  <meta name="twitter:site" content="Notes from Max">
+  <meta name="twitter:creator" content="@maxwenger">
+  <meta name="twitter:domain" content="http://www.maxwenger.com">
+  <meta property="twitter:image" content="">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|Lora|Space+Mono:700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <link rel="alternate" type="application/rss+xml" title="Notes from Max" href="http://www.maxwenger.com/feed.xml">
+  <link rel="canonical" href="http://www.maxwenger.com/">
+
+  
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-93216105-2', 'auto');
+      ga('send', 'pageview');
+    </script>
+  
+</head>
+
+
+  <body>
+
+    <main>
+      <section class="previews">
+  <div>
+    
+      <figure class="absolute-bg preview__img" style="background-image: url('/assets/img/2018-06-14-policy-based-routing-pbr/cover.png');"></figure>
+    
+      <figure class="absolute-bg preview__img" style="background-image: url('/assets/img/2018-02-13-vrf-lite/cover.png');"></figure>
+    
+      <figure class="absolute-bg preview__img" style="background-image: url('/assets/img/2018-02-13-generic-routing-encapsulation-gre/cover.png');"></figure>
+    
+    <div class="previews__container">
+      <span>Welcome to</span>
+      <h1>Notes from Max</h1>
+    </div>
+  </div>
+
+  <div>
+    <header>
+      <ul class="tabs">
+        <li class="tabs__item">Posts</li>
+        <li class="tabs__item">Categories</li>
+      </ul>
+    </header>
+
+    <div class="tab">
+      <ul itemscope itemtype="http://schema.org/Blog">
+        
+          <li class="preview" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+            <a class="preview__link" href="/2018/06/14/policy-based-routing-pbr/" itemprop="url">
+              <span class="preview__date" itemprop="datePublished" datetime="2018-06-14T00:00:00-05:00">Jun 14, 2018</span>
+              <h2 class="preview__header" itemprop="name">Policy-Based Routing (PBR)</h2>
+              <p class="preview__excerpt" itemprop="description">Policy-Based Routing (PBR) Policy-Based routing gives network administrators very granular control over their networks. Administrators can control how the traffic flows by source and/or destination, protocol, size of the packet,...</p>
+              <span class="preview__more">Read More</span>
+            </a>
+          </li>
+        
+          <li class="preview" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+            <a class="preview__link" href="/2018/05/12/vrf-lite/" itemprop="url">
+              <span class="preview__date" itemprop="datePublished" datetime="2018-05-12T00:00:00-05:00">May 12, 2018</span>
+              <h2 class="preview__header" itemprop="name">VRF-Lite</h2>
+              <p class="preview__excerpt" itemprop="description">VRF-Lite VRF-Lite*, or Virtual Routing and Forwarding Lite, is yet another VPN protocol that segregates traffic on a shared line, but as John Templeton said, “this time it’s different”. Most...</p>
+              <span class="preview__more">Read More</span>
+            </a>
+          </li>
+        
+          <li class="preview" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+            <a class="preview__link" href="/2018/02/13/generic-routing-encapsulation-gre/" itemprop="url">
+              <span class="preview__date" itemprop="datePublished" datetime="2018-02-13T00:00:00-06:00">Feb 13, 2018</span>
+              <h2 class="preview__header" itemprop="name">Generic Routing Encapsulation (GRE)</h2>
+              <p class="preview__excerpt" itemprop="description">GRE is one of many Virtual Private Network (VPN) technologies. VPNs act like a conduit that runs between two (or more… foreshadowing!) routers where traffic can flow through as if...</p>
+              <span class="preview__more">Read More</span>
+            </a>
+          </li>
+        
+      </ul>
+
+      
+
+      <footer class="section-padding--sm footer">
+  <a class="footer__archive" href="/archive/">Archive</a>
+  <ul class="footer__social">
+    <li><a class="fa fa-lg fa-envelope-o" href="mailto:max@maxwellwenger.com"></a></li>
+    
+      <li><a class="fa fa-lg fa-github" href="http://github.com/maxwenger/" target="_blank"></a></li>
+    
+      <li><a class="fa fa-lg fa-linkedin" href="https://www.linkedin.com/in/maxwell-wenger/" target="_blank"></a></li>
+    
+      <li><a class="fa fa-lg fa-twitter" href="https://twitter.com/maxwellwenger/" target="_blank"></a></li>
+    
+  </ul>
+</footer>
+
+    </div>
+
+    <div class="tab">
+  <ul class="cards">
+    
+    
+
+    
+      <li class="card">
+        
+        <a class="card__link" href="/category/networking/">
+          
+            <div class="card__img">
+              
+                <figure class="absolute-bg" style="background-image: url('/assets/img/2018-06-14-policy-based-routing-pbr/cover-sm.png');"></figure>
+              
+            </div>
+          
+          <div class="card__container">
+            <h2 class="card__header">Networking</h2>
+            <p class="card__count">3 Posts</p>
+            <span class="card__more">View All</span>
+          </div>
+        </a>
+      </li>
+    
+      <li class="card">
+        
+        <a class="card__link" href="/category/routing/">
+          
+            <div class="card__img">
+              
+                <figure class="absolute-bg" style="background-image: url('/assets/img/2018-06-14-policy-based-routing-pbr/cover-sm.png');"></figure>
+              
+            </div>
+          
+          <div class="card__container">
+            <h2 class="card__header">Routing</h2>
+            <p class="card__count">2 Posts</p>
+            <span class="card__more">View All</span>
+          </div>
+        </a>
+      </li>
+    
+      <li class="card">
+        
+        <a class="card__link" href="/category/vpn/">
+          
+            <div class="card__img">
+              
+                <figure class="absolute-bg" style="background-image: url('/assets/img/2018-02-13-vrf-lite/cover-sm.png');"></figure>
+              
+            </div>
+          
+          <div class="card__container">
+            <h2 class="card__header">VPN</h2>
+            <p class="card__count">1 Posts</p>
+            <span class="card__more">View All</span>
+          </div>
+        </a>
+      </li>
+    
+  </ul>
+
+  <footer class="section-padding--sm footer">
+  <a class="footer__archive" href="/archive/">Archive</a>
+  <ul class="footer__social">
+    <li><a class="fa fa-lg fa-envelope-o" href="mailto:max@maxwellwenger.com"></a></li>
+    
+      <li><a class="fa fa-lg fa-github" href="http://github.com/maxwenger/" target="_blank"></a></li>
+    
+      <li><a class="fa fa-lg fa-linkedin" href="https://www.linkedin.com/in/maxwell-wenger/" target="_blank"></a></li>
+    
+      <li><a class="fa fa-lg fa-twitter" href="https://twitter.com/maxwellwenger/" target="_blank"></a></li>
+    
+  </ul>
+</footer>
+
+</div>
+
+
+  </div>
+
+</section>
+
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rellax/1.0.0/rellax.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script type="text/javascript" src="/assets/js/app.js"></script>
+
+
+  </body>
+
+</html>

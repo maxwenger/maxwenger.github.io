@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>VRF-Lite | Notes from Max</title>
+  <meta name="author" content="Maxwell Wenger">
+  <meta name="description" content="Max Wenger's thoughts on programming and networking.">
+  <meta property="og:title" content="VRF-Lite | Notes from Max">
+  <meta property="og:url" content="http://www.maxwenger.com/2018/05/12/vrf-lite/">
+  <meta property="og:site_name" content="Notes from Max">
+  <meta property="og:description" content="Max Wenger's thoughts on programming and networking.">
+  <meta property="og:image" content="/assets/img/2018-02-13-vrf-lite/cover.png">
+  <meta property="og:type" content="blog">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:description" content="Max Wenger's thoughts on programming and networking.">
+  <meta name="twitter:title" content="VRF-Lite | Notes from Max">
+  <meta name="twitter:url" content="http://www.maxwenger.com/2018/05/12/vrf-lite/">
+  <meta name="twitter:site" content="Notes from Max">
+  <meta name="twitter:creator" content="@maxwenger">
+  <meta name="twitter:domain" content="http://www.maxwenger.com">
+  <meta property="twitter:image" content="/assets/img/2018-02-13-vrf-lite/cover.png">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|Lora|Space+Mono:700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <link rel="alternate" type="application/rss+xml" title="Notes from Max" href="http://www.maxwenger.com/feed.xml">
+  <link rel="canonical" href="http://www.maxwenger.com/2018/05/12/vrf-lite/">
+
+  
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-93216105-2', 'auto');
+      ga('send', 'pageview');
+    </script>
+  
+</head>
+
+
+  <body>
+
+    <main>
+      <article itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="section-padding--lg mast rellax" data-rellax-speed="-4">
+    <a class="nav nav--white" href="/">
+      <i class="fa fa-lg fa-arrow-left"></i>
+      <span>Back to Posts</span>
+    </a>
+    <figure class="absolute-bg mast__img" style="background-image: url('/assets/img/2018-02-13-vrf-lite/cover.png');"></figure>
+    <div class="mast__container">
+      <span><time datetime="2018-05-12T00:00:00-05:00" itemprop="datePublished">May 12, 2018</time></span>
+      <h1 itemprop="name headline">VRF-Lite</h1>
+      
+        <span>Posted in 
+          
+            <a class="nav--white" href="/category/networking">Networking</a>, 
+          
+            <a class="nav--white" href="/category/routing">Routing</a>, 
+          
+            <a class="nav--white" href="/category/vpn">VPN</a>
+          
+        </span>
+      
+      <span></span>
+    </div>
+  </header>
+
+  <section class="section-padding bg-grey" itemprop="articleBody">
+    <div class="post">
+      <h1 id="vrf-lite">VRF-Lite</h1>
+
+<p>VRF-Lite*, or Virtual Routing and Forwarding Lite, is yet another VPN protocol that segregates traffic on a shared line, but as John Templeton said, “this time it’s different”. Most VPN protocols (e.g. GRE, L2TP, PPTP, etc) encapsulate the traffic once, and expand the traffic once it gets to its destination, and the routing between the two endpoints are seen as a tunnel. The encapsulated traffic never deals with any transit routing, it just sees the two ends of the tunnel as a single network.</p>
+
+<p>VRFs don’t encapsulate, VRFs don’t use any new network protocol. VRFs is just a function of the router.</p>
+
+<p>For each VRF, you get a new routing table. This allows a single router to route traffic for separate networks without having traffic “mix”. For example, an ISP could use a single router to route traffic for multiple customers.</p>
+
+<p><img src="/assets/img/2018-02-13-vrf-lite/swot.png" alt="SWOT" /></p>
+
+<p><em>*I will refer to VRFs and VRF-Lite interchangeably with the understanding that VRF-Lite is only an implementation of VRF.</em></p>
+
+<h2 id="background-information">Background Information</h2>
+
+<p>As described above, VRFs create a “virtual” routing table for each VRF. This routing table, for all intents and purposes, is a virtual router running inside of the router running the VRFs. For those familiar with virtualization, the router acts like a hypervisor for “guest routing tables”. Each VRF will have separate routing instances, and can even use overlapping IP addresses.</p>
+
+<p>There are three steps to create a VRF. The first step is to create the VRF. This only makes a new routing table. When first creating the VRF, the VRFs routing table is empty, even if there were previously configured routes in the “host” routing table.</p>
+
+<p>The next step is to assign interfaces to the VRF. The interfaces can be either physical (e.g. Gigabit, FastEthernet, etc) or virtual (e.g. Dot1q, GRE, MPLS, etc). Once the interface is assigned to the VRF, that interface is exclusively assigned to the VRF.</p>
+
+<p>Finally, a new routing instance needs to be configured to route traffic for the VRF. This is done by creating, for example, a new OSPF instance with a new process number. Again, this instance is also exclusive to the VRF it’s assigned to.</p>
+
+<h2 id="lab-summary">Lab Summary</h2>
+
+<p>We will create a topology with two VRFs routed between four hosts (two per VRF), three routers, and a switch. The routers will all run both VRFs and route them separately. The switch will be connected to R3 as a trunk and maintain network isolation by switching them in two different VLAN (VLAN 10 and 20).</p>
+
+<h2 id="topology">Topology</h2>
+
+<p><img src="/assets/img/2018-02-13-vrf-lite/topology.png" alt="Topology" /></p>
+
+<h2 id="configuration">Configuration</h2>
+
+<ol>
+  <li>Create the VRF</li>
+  <li>Assign the VRF to an interface</li>
+  <li>Route over VRFs</li>
+</ol>
+
+<h3 id="create-the-vrf">Create the VRF</h3>
+
+<p>The first step is to create the VRF. Use the following command to provision both VRF <code class="highlighter-rouge">green</code> and VRF <code class="highlighter-rouge">red</code>.</p>
+
+<pre><code class="language-ios">(config)#ip vrf green
+(config)#ip vrf red
+</code></pre>
+
+<h3 id="assign-the-vrf-to-an-interface">Assign the VRF to an interface</h3>
+
+<p>A VRF is just a routing table at this point, no interfaces assigned, so no way to send or receive traffic. Beware that the command to assign a VRF to an interface may clear some existing configurations, especially the IP address of that interface.</p>
+
+<h4 id="assigning-a-vrf-to-an-interface">Assigning a VRF to an interface</h4>
+
+<p>The following command will assign a VRF to a normal interface.</p>
+
+<pre><code class="language-ios">(config-if)#ip vrf forwarding green
+</code></pre>
+
+<h4 id="assigning-a-vrf-to-a-sub-interface">Assigning a VRF to a sub interface</h4>
+
+<p>The following command will assign a VRF to a sub interface. Setting the encapsulation is required to for use over a sub-interface.</p>
+
+<pre><code class="language-ios">(config-subif)#encapsulation dot1q 10
+(config-subif)#ip vrf forwarding green
+</code></pre>
+
+<h3 id="route-over-vrfs">Route over VRFs</h3>
+
+<p>Because each VRF has it’s own routing table, they each need their own routing process. The following command is used to enable OSPF routing over VRFs, but most routing protocols can be ran over VRF using a similar command.</p>
+
+<pre><code class="language-ios">(config)#router ospf 1 vrf green
+</code></pre>
+
+<h3 id="full-configureations">Full configureations</h3>
+
+<p><em>click to expand</em></p>
+
+<details>
+ <summary> R1</summary>
+<xmp>
+#R1
+
+hostname R1
+
+ip vrf green
+ip vrf red
+
+router ospf 1 vrf green
+router-id 1.1.1.1
+router ospf 2 vrf red
+router-id 2.2.2.1
+
+int s0/0/0
+clock rate 64000
+ip vrf forwarding green
+ip address 10.0.0.1 255.255.255.252
+ip ospf 1 area 0
+
+int s0/0/1
+clock rate 64000
+ip vrf forwarding red
+ip address 10.0.0.1 255.255.255.252
+ip ospf 2 area 0
+
+int f0/0
+ip vrf forwarding green
+ip add 192.168.1.1 255.255.255.0
+ip ospf 1 area 0
+
+int f0/1
+ip vrf forwarding red
+ip add 192.168.1.1 255.255.255.0
+ip ospf 2 area 0
+</xmp>
+
+</details>
+<details>
+ <summary>R2</summary>
+<xmp>
+#R2
+
+hostname R2
+
+ip vrf green
+ip vrf red
+
+router ospf 1 vrf green
+router-id 1.1.1.2
+router ospf 2 vrf red
+router-id 2.2.2.2
+
+int s0/0/0
+clock rate 64000
+ip vrf forwarding green
+ip address 10.0.0.2 255.255.255.252
+ip ospf 1 area 0
+
+int s0/0/1
+clock rate 64000
+ip vrf forwarding red
+ip address 10.0.0.2 255.255.255.252
+ip ospf 2 area 0
+
+
+int f0/0.10
+ip vrf forwarding green
+encapsulation dot1q 10
+ip add 10.0.0.5 255.255.255.252
+ip ospf 1 area 0
+
+int f0/0.20
+ip vrf forwarding red
+encapsulation dot1q 20
+ip add 10.0.0.5 255.255.255.252
+ip ospf 2 area 0
+</xmp>
+
+</details>
+<details>
+ <summary>R3</summary>
+<xmp>
+#R3
+
+hostname R3
+
+ip vrf green
+ip vrf red
+
+router ospf 1 vrf green
+router-id 1.1.1.3
+router ospf 2 vrf red
+router-id 2.2.2.3
+
+int f0/0.10
+ip vrf forwarding green
+encapsulation dot1q 10
+ip add 10.0.0.6 255.255.255.252
+ip ospf 1 area 0
+
+int f0/0.20
+ip vrf forwarding red
+encapsulation dot1q 20
+ip add 10.0.0.6 255.255.255.252
+ip ospf 2 area 0
+
+int f0/1.10
+ip vrf forwarding green
+encapsulation dot1q 10
+ip add 192.168.2.1 255.255.255.0
+ip ospf 1 area 0
+
+int f0/1.20
+ip vrf forwarding red
+encapsulation dot1q 20
+ip add 192.168.2.1 255.255.255.0
+ip ospf 2 area 0
+</xmp>
+
+</details>
+<details>
+ <summary>S1</summary>
+<xmp>
+# S1
+
+hostname S1
+
+vlan 10
+vlan 20
+
+int f0/5
+switchport trunk encap dot1q
+switchport mode trunk
+
+int f0/9
+switchport mode access
+switchport access vlan 10
+
+int f0/18
+switchport mode access
+switchport access vlan 20
+</xmp>
+
+</details>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>VRFs is a very powerful tool when creating complex networking topologies. They really show their usefulness when VRFs run over an MPLS circuit (future lab?). They can isolate networks, separate customers, and prevent route-leaking. There are many creative uses for a protocol that allows multiple routing tables and the ability to have overlapping IP addresses.</p>
+
+    </div>
+  </section>
+
+  <section class="profile">
+    <div class="profile__card">
+      <div class="profile__img">
+        <figure class="absolute-bg" style="background-image: url('/profile.png');"></figure>
+      </div>
+      <div class="profile__container">
+        <p>Maxwell Wenger was born in Bellevue, Washington, and still lives close by. He is currently a student studying Computer Science, doing some ad hoc development and some Cisco Networking training on the side.</p>
+        
+          <ul class="profile__social">
+            
+              <li><a class="fa fa-lg fa-envelope-o" href="mailto:max@maxwellwenger.com"></a></li>
+            
+            
+              <li><a class="fa fa-lg fa-github" href="http://github.com/maxwenger/" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-linkedin" href="https://www.linkedin.com/in/maxwell-wenger/" target="_blank"></a></li>
+            
+              <li><a class="fa fa-lg fa-twitter" href="https://twitter.com/maxwellwenger/" target="_blank"></a></li>
+            
+          </ul>
+        
+      </div>
+    </div>
+  </section>
+
+</article>
+
+
+  <section class="next">
+    <a class="next__link" href="/2018/02/13/generic-routing-encapsulation-gre/" style="background-image: url('/assets/img/2018-02-13-generic-routing-encapsulation-gre/cover.png');">
+      <div class="next__container">
+        <span>Read Next</span>
+        <h2>Generic Routing Encapsulation (GRE)</h2>
+      </div>
+    </a>
+  </section>
+
+
+<div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://notes-from-max.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                            
+
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rellax/1.0.0/rellax.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script type="text/javascript" src="/assets/js/app.js"></script>
+
+
+  </body>
+
+</html>

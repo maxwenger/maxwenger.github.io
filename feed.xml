@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Notes from Max</title>
+    <description>Max Wenger&#39;s thoughts on programming and networking.</description>
+    <link>http://www.maxwenger.com/</link>
+    <atom:link href="http://www.maxwenger.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sun, 17 Jun 2018 01:22:44 -0500</pubDate>
+    <lastBuildDate>Sun, 17 Jun 2018 01:22:44 -0500</lastBuildDate>
+    <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Policy-Based Routing (PBR)</title>
+        <description>&lt;h1 id=&quot;policy-based-routing-pbr&quot;&gt;Policy-Based Routing (PBR)&lt;/h1&gt;
+
+&lt;p&gt;Policy-Based routing gives network administrators very granular control over their networks. Administrators can control how the traffic flows by source and/or destination, protocol, size of the packet, or even time of day. PBR harness the power of access lists and route maps. PBR is a list of criteria that changes how the packet is routed if it matches the criteria before it is routed by the routing table.&lt;/p&gt;
+
+&lt;h2 id=&quot;background-information&quot;&gt;Background Information&lt;/h2&gt;
+
+&lt;p&gt;At the point that a Cisco Certificate Candidate is exploring Policy-Based Routing, they have already encountered many different types of routing protocols. If asked to categorize routing protocols, the differences between RIP and OSPF can easily be differentiated by describing distance vector and link state protocols. But they are both dynamic protocols. Policy-Based Routing is a “routing protocol” just as much as static routes are a routing protocol.&lt;/p&gt;
+
+&lt;p&gt;A route map is a logic structure that allows very granular control of the flow of traffic. It uses &lt;code class=&quot;highlighter-rouge&quot;&gt;match&lt;/code&gt; statements to define a condition, and &lt;code class=&quot;highlighter-rouge&quot;&gt;set&lt;/code&gt; statements to modify the traffic if the condition is met. These &lt;code class=&quot;highlighter-rouge&quot;&gt;match&lt;/code&gt; statements can be defined using an access list (standard or extended) using the &lt;code class=&quot;highlighter-rouge&quot;&gt;match ip address &amp;lt;ACL Name/Number&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If traffic “matches” the access lists, it continues to the &lt;code class=&quot;highlighter-rouge&quot;&gt;set&lt;/code&gt; statements. The &lt;code class=&quot;highlighter-rouge&quot;&gt;set&lt;/code&gt; statements change how the traffic is routed. It is the action preformed if the traffic matches the initial statement.&lt;/p&gt;
+
+&lt;h2 id=&quot;lab-summary&quot;&gt;Lab Summary&lt;/h2&gt;
+
+&lt;p&gt;Our task is to write a network policy that only allows HTTP traffic to route to the HTTP-Responder and HTTPS traffic to go to the HTTPS-Responder. Although both HTTP and HTTPS will be enabled on both routers, only its respective traffic should be routed to it.&lt;/p&gt;
+
+&lt;h2 id=&quot;lab-topology&quot;&gt;Lab Topology&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/2018-06-14-policy-based-routing-pbr/topology.png&quot; alt=&quot;Topology&quot; /&gt;
+&lt;img src=&quot;/assets/img/2018-06-14-policy-based-routing-pbr/flow.png&quot; alt=&quot;Route Map Flow Chart&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Basic configuration including IP addresses.&lt;/li&gt;
+  &lt;li&gt;Configure HTTP and HTTPS responders with HTTP servers with secure server and authentication enabled.&lt;/li&gt;
+  &lt;li&gt;Create access lists for HTTP and HTTPS routes.&lt;/li&gt;
+  &lt;li&gt;Create a Route-Map to route HTTP and HTTPS traffic using the previously created ACLs.&lt;/li&gt;
+  &lt;li&gt;Apply the route maps to the interface.&lt;/li&gt;
+  &lt;li&gt;Verify the configurations.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;configure-http-and-https-responders&quot;&gt;Configure HTTP and HTTPS Responders&lt;/h3&gt;
+
+&lt;p&gt;The configuration for both routers are the same except for a null route to prevent re-routing filtered traffic.&lt;/p&gt;
+
+&lt;p&gt;The following commands creates a user &lt;code class=&quot;highlighter-rouge&quot;&gt;admin&lt;/code&gt;, enables the HTTP and HTTPS services, and uses local authentication to login to the service (previously created user &lt;code class=&quot;highlighter-rouge&quot;&gt;admin&lt;/code&gt; can login to the server).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;username admin privilege 15 secret cisco
+ip http server
+ip http secure-server
+ip http authentication local
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The configurations that differ between the two responders is the null route. This route is a fix for the issue outlined in the problems section. It prevents filtered traffic from being re-routed to the other router.&lt;/p&gt;
+
+&lt;h4 id=&quot;http-responder&quot;&gt;HTTP-Responder&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;ip route 10.2.2.2 255.255.255.255 null0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;https-responder&quot;&gt;HTTPS-Responder&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;ip route 10.1.1.2 255.255.255.255 null0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;http-and-https-access-lists&quot;&gt;HTTP and HTTPS Access Lists&lt;/h3&gt;
+
+&lt;p&gt;These two access lists will &lt;code class=&quot;highlighter-rouge&quot;&gt;permit&lt;/code&gt; all HTTP or HTTPS traffic respectively. Anything permitted by the access lists with fulfill the &lt;code class=&quot;highlighter-rouge&quot;&gt;match&lt;/code&gt; condition in the route-maps.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;ip access-list extended HTTP_Route
+  permit tcp any any eq 80
+ip access-list extended HTTPS_Route
+  permit tcp any any eq 443
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;webpolicy-route-map&quot;&gt;Web_Policy Route Map&lt;/h3&gt;
+
+&lt;p&gt;The route map will include two sequences for HTTP and HTTPS traffic. One sequence will &lt;code class=&quot;highlighter-rouge&quot;&gt;match&lt;/code&gt; against the HTTP route, and another will &lt;code class=&quot;highlighter-rouge&quot;&gt;match&lt;/code&gt; against the HTTPS route. It will then forward the matching traffic out the correct interface towards the HTTP or HTTPS Responder respectively.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;route-map Web_Policy 10
+  match ip address HTTP_Route
+  set ip next-hop 10.1.1.2
+  set interface serial 0/0/0
+route-map Web_Policy 20
+  match ip address HTTPS_Route
+  set ip next-hop 10.2.2.2
+  set interface serial 0/0/1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;apply-the-webpolicy-to-a-interface&quot;&gt;Apply the Web_Policy to a Interface&lt;/h3&gt;
+
+&lt;p&gt;We want the traffic to be filtered at the interface closest to the client. In this case, that’s the &lt;code class=&quot;highlighter-rouge&quot;&gt;FastEthernet0/0&lt;/code&gt; interface. This will only filter traffic on that interface, no other interfaces will be affected.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;interface FastEthernet0/0
+  ip policy route-map Web_Policy
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;verification&quot;&gt;Verification&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;Core#show access-lists HTTP_Route
+Extended IP access list HTTP_Route
+    10 permit tcp any any eq www
+Core#show access-lists HTTPS_Route
+Extended IP access list HTTPS_Route
+    10 permit tcp any any eq 443
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;Core#show route-map Web_Policy
+route-map Web_Policy, permit, sequence 10
+  Match clauses:
+    ip address (access-lists): HTTP_Route
+  Set clauses:
+    ip next-hop 10.1.1.2
+    interface Serial0/0/0
+  Policy routing matches: 0 packets, 0 bytes
+route-map Web_Policy, permit, sequence 20
+  Match clauses:
+    ip address (access-lists): HTTPS_Route
+  Set clauses:
+    ip next-hop 10.2.2.2
+    interface Serial0/0/1
+  Policy routing matches: 0 packets, 0 bytes
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;Core#show ip policy
+Interface      Route map
+Fa0/0          Web_Policy
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice traffic is being forwarded to both servers as expected, and traffic that doesn’t match is forwarded as normal.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cisco&quot;&gt;Core#debug ip policy
+Policy routing debugging is on
+IP: s=192.168.1.2 (FastEthernet0/0), d=10.1.1.2, len 52, FIB policy match
+IP: s=192.168.1.2 (FastEthernet0/0), d=10.1.1.2, len 52, PBR Counted
+IP: s=192.168.1.2 (FastEthernet0/0), d=10.1.1.2, g=10.1.1.2, len 52, FIB policy routed
+IP: s=192.168.1.2 (FastEthernet0/0), d=10.2.2.2, len 47, FIB policy match
+IP: s=192.168.1.2 (FastEthernet0/0), d=10.2.2.2, len 47, PBR Counted
+IP: s=192.168.1.2 (FastEthernet0/0), d=10.2.2.2, g=10.2.2.2, len 47, FIB policy routed
+IP: s=192.168.1.2 (FastEthernet0/0), d=192.168.1.255, len 78, policy rejected -- normal forwarding
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;full-configurations&quot;&gt;Full Configurations&lt;/h3&gt;
+
+&lt;p&gt;&lt;em&gt;Click to expand&lt;/em&gt;&lt;/p&gt;
+
+&lt;details&gt;
+  &lt;summary&gt;&amp;gt; Core&lt;/summary&gt;
+  &lt;xmp&gt;
+hostname Core
+
+! Interface configuration
+interface serial 0/0/0
+    ip address 10.1.1.1 255.255.255.0
+    no shutdown
+interface serial 0/0/1
+    ip address 10.2.2.1 255.255.255.0
+    no shutdown
+interface FastEthernet 0/0
+    ip address 192.168.1.1 255.255.255.0
+    no shutdown
+
+! Configure PBR
+ip access-list extended HTTP_Route
+    permit tcp any any eq 80
+ip access-list extended HTTPS_Route
+    permit tcp any any eq 443
+
+route-map Web_Policy 10
+    match ip address HTTP_Route
+    set ip next-hop 10.1.1.2
+    set interface serial 0/0/0
+exit
+route-map Web_Policy 20
+    match ip address HTTPS_Route
+    set ip next-hop 10.2.2.2
+    set interface serial 0/0/1
+exit
+
+interface FastEthernet0/0
+    ip policy route-map Web_Policy
+&lt;/xmp&gt;
+&lt;/details&gt;
+
+&lt;details&gt;
+ &lt;summary&gt;&amp;gt; HTTP-Responder&lt;/summary&gt;
+&lt;xmp&gt;
+hostname HTTP-Responder
+
+! Interface configuration
+interface serial 0/0/0
+    ip address 10.1.1.2 255.255.255.0
+    no shutdown
+
+! Enable routing
+ip route  0.0.0.0 0.0.0.0 serial 0/0/0
+ip route 10.2.2.2 255.255.255.255 null0
+
+! Configure both HTTP and HTTPS server
+username admin privilege 15 secret cisco
+ip http server
+ip http secure-server
+ip http authentication local
+&lt;/xmp&gt;
+
+&lt;/details&gt;
+
+&lt;details&gt;
+ &lt;summary&gt;&amp;gt; HTTPS-Responder&lt;/summary&gt;
+&lt;xmp&gt;
+hostname HTTPS-Responder
+
+! Interface configuration
+interface serial 0/0/0
+    ip address 10.2.2.2 255.255.255.0
+    no shutdown
+
+! Enable routing
+ip route  0.0.0.0 0.0.0.0 serial 0/0/0
+ip route 10.1.1.2 255.255.255.255 null0
+
+! Configure both HTTP and HTTPS server
+username admin privilege 15 secret cisco
+ip http server
+ip http secure-server
+ip http authentication local
+&lt;/xmp&gt;
+&lt;/details&gt;
+
+&lt;h2 id=&quot;problems&quot;&gt;Problems&lt;/h2&gt;
+
+&lt;p&gt;As mentioned above, route maps can be applied globally or per interface. In this lab, we only applied it on the Fast Ethernet 0/0 interface. This meant HTTP/HTTPS filtering was only occurring on that interface – not on the serial interfaces. This caused HTTPS traffic destined for the HTTP-Responder to get correctly filtered to the HTTP-Responder router, but because its a &lt;em&gt;router&lt;/em&gt;, it routed the HTTPS traffic back to the HTTPS-Responder. There are a few ways to resolve this issue.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Explicitly deny mismatching traffic (HTTP to the HTTPS-Responder and vis versa).&lt;/li&gt;
+  &lt;li&gt;Apply filters the the Serial interface&lt;/li&gt;
+  &lt;li&gt;Block traffic between the HTTP-Responder and HTTPS-Responder&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This lab used the third option. This is not an optimal option because it blocks &lt;em&gt;all&lt;/em&gt; traffic between these two routers. Depending on the application, the best solution would be to modify the Route Map to block mismatching traffic from exiting the Core router.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Policy-based routing gives Network Administrators full control of how traffic is routed in their networks. Although PBR can be used as a way to proxy out different types of traffic, it has many more powerful features that warrant exploration. Future labs might use PBRs to route traffic based on traffic properties and manipulating fields within the packet.&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 14 Jun 2018 00:00:00 -0500</pubDate>
+        <link>http://www.maxwenger.com/2018/06/14/policy-based-routing-pbr/</link>
+        <guid isPermaLink="true">http://www.maxwenger.com/2018/06/14/policy-based-routing-pbr/</guid>
+        
+        
+        <category>Networking</category>
+        
+        <category>Routing</category>
+        
+      </item>
+    
+      <item>
+        <title>VRF-Lite</title>
+        <description>&lt;h1 id=&quot;vrf-lite&quot;&gt;VRF-Lite&lt;/h1&gt;
+
+&lt;p&gt;VRF-Lite*, or Virtual Routing and Forwarding Lite, is yet another VPN protocol that segregates traffic on a shared line, but as John Templeton said, “this time it’s different”. Most VPN protocols (e.g. GRE, L2TP, PPTP, etc) encapsulate the traffic once, and expand the traffic once it gets to its destination, and the routing between the two endpoints are seen as a tunnel. The encapsulated traffic never deals with any transit routing, it just sees the two ends of the tunnel as a single network.&lt;/p&gt;
+
+&lt;p&gt;VRFs don’t encapsulate, VRFs don’t use any new network protocol. VRFs is just a function of the router.&lt;/p&gt;
+
+&lt;p&gt;For each VRF, you get a new routing table. This allows a single router to route traffic for separate networks without having traffic “mix”. For example, an ISP could use a single router to route traffic for multiple customers.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/2018-02-13-vrf-lite/swot.png&quot; alt=&quot;SWOT&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;*I will refer to VRFs and VRF-Lite interchangeably with the understanding that VRF-Lite is only an implementation of VRF.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;background-information&quot;&gt;Background Information&lt;/h2&gt;
+
+&lt;p&gt;As described above, VRFs create a “virtual” routing table for each VRF. This routing table, for all intents and purposes, is a virtual router running inside of the router running the VRFs. For those familiar with virtualization, the router acts like a hypervisor for “guest routing tables”. Each VRF will have separate routing instances, and can even use overlapping IP addresses.&lt;/p&gt;
+
+&lt;p&gt;There are three steps to create a VRF. The first step is to create the VRF. This only makes a new routing table. When first creating the VRF, the VRFs routing table is empty, even if there were previously configured routes in the “host” routing table.&lt;/p&gt;
+
+&lt;p&gt;The next step is to assign interfaces to the VRF. The interfaces can be either physical (e.g. Gigabit, FastEthernet, etc) or virtual (e.g. Dot1q, GRE, MPLS, etc). Once the interface is assigned to the VRF, that interface is exclusively assigned to the VRF.&lt;/p&gt;
+
+&lt;p&gt;Finally, a new routing instance needs to be configured to route traffic for the VRF. This is done by creating, for example, a new OSPF instance with a new process number. Again, this instance is also exclusive to the VRF it’s assigned to.&lt;/p&gt;
+
+&lt;h2 id=&quot;lab-summary&quot;&gt;Lab Summary&lt;/h2&gt;
+
+&lt;p&gt;We will create a topology with two VRFs routed between four hosts (two per VRF), three routers, and a switch. The routers will all run both VRFs and route them separately. The switch will be connected to R3 as a trunk and maintain network isolation by switching them in two different VLAN (VLAN 10 and 20).&lt;/p&gt;
+
+&lt;h2 id=&quot;topology&quot;&gt;Topology&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/2018-02-13-vrf-lite/topology.png&quot; alt=&quot;Topology&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Create the VRF&lt;/li&gt;
+  &lt;li&gt;Assign the VRF to an interface&lt;/li&gt;
+  &lt;li&gt;Route over VRFs&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;create-the-vrf&quot;&gt;Create the VRF&lt;/h3&gt;
+
+&lt;p&gt;The first step is to create the VRF. Use the following command to provision both VRF &lt;code class=&quot;highlighter-rouge&quot;&gt;green&lt;/code&gt; and VRF &lt;code class=&quot;highlighter-rouge&quot;&gt;red&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ios&quot;&gt;(config)#ip vrf green
+(config)#ip vrf red
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;assign-the-vrf-to-an-interface&quot;&gt;Assign the VRF to an interface&lt;/h3&gt;
+
+&lt;p&gt;A VRF is just a routing table at this point, no interfaces assigned, so no way to send or receive traffic. Beware that the command to assign a VRF to an interface may clear some existing configurations, especially the IP address of that interface.&lt;/p&gt;
+
+&lt;h4 id=&quot;assigning-a-vrf-to-an-interface&quot;&gt;Assigning a VRF to an interface&lt;/h4&gt;
+
+&lt;p&gt;The following command will assign a VRF to a normal interface.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ios&quot;&gt;(config-if)#ip vrf forwarding green
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;assigning-a-vrf-to-a-sub-interface&quot;&gt;Assigning a VRF to a sub interface&lt;/h4&gt;
+
+&lt;p&gt;The following command will assign a VRF to a sub interface. Setting the encapsulation is required to for use over a sub-interface.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ios&quot;&gt;(config-subif)#encapsulation dot1q 10
+(config-subif)#ip vrf forwarding green
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;route-over-vrfs&quot;&gt;Route over VRFs&lt;/h3&gt;
+
+&lt;p&gt;Because each VRF has it’s own routing table, they each need their own routing process. The following command is used to enable OSPF routing over VRFs, but most routing protocols can be ran over VRF using a similar command.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ios&quot;&gt;(config)#router ospf 1 vrf green
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;full-configureations&quot;&gt;Full configureations&lt;/h3&gt;
+
+&lt;p&gt;&lt;em&gt;click to expand&lt;/em&gt;&lt;/p&gt;
+
+&lt;details&gt;
+ &lt;summary&gt; R1&lt;/summary&gt;
+&lt;xmp&gt;
+#R1
+
+hostname R1
+
+ip vrf green
+ip vrf red
+
+router ospf 1 vrf green
+router-id 1.1.1.1
+router ospf 2 vrf red
+router-id 2.2.2.1
+
+int s0/0/0
+clock rate 64000
+ip vrf forwarding green
+ip address 10.0.0.1 255.255.255.252
+ip ospf 1 area 0
+
+int s0/0/1
+clock rate 64000
+ip vrf forwarding red
+ip address 10.0.0.1 255.255.255.252
+ip ospf 2 area 0
+
+int f0/0
+ip vrf forwarding green
+ip add 192.168.1.1 255.255.255.0
+ip ospf 1 area 0
+
+int f0/1
+ip vrf forwarding red
+ip add 192.168.1.1 255.255.255.0
+ip ospf 2 area 0
+&lt;/xmp&gt;
+
+&lt;/details&gt;
+&lt;details&gt;
+ &lt;summary&gt;R2&lt;/summary&gt;
+&lt;xmp&gt;
+#R2
+
+hostname R2
+
+ip vrf green
+ip vrf red
+
+router ospf 1 vrf green
+router-id 1.1.1.2
+router ospf 2 vrf red
+router-id 2.2.2.2
+
+int s0/0/0
+clock rate 64000
+ip vrf forwarding green
+ip address 10.0.0.2 255.255.255.252
+ip ospf 1 area 0
+
+int s0/0/1
+clock rate 64000
+ip vrf forwarding red
+ip address 10.0.0.2 255.255.255.252
+ip ospf 2 area 0
+
+
+int f0/0.10
+ip vrf forwarding green
+encapsulation dot1q 10
+ip add 10.0.0.5 255.255.255.252
+ip ospf 1 area 0
+
+int f0/0.20
+ip vrf forwarding red
+encapsulation dot1q 20
+ip add 10.0.0.5 255.255.255.252
+ip ospf 2 area 0
+&lt;/xmp&gt;
+
+&lt;/details&gt;
+&lt;details&gt;
+ &lt;summary&gt;R3&lt;/summary&gt;
+&lt;xmp&gt;
+#R3
+
+hostname R3
+
+ip vrf green
+ip vrf red
+
+router ospf 1 vrf green
+router-id 1.1.1.3
+router ospf 2 vrf red
+router-id 2.2.2.3
+
+int f0/0.10
+ip vrf forwarding green
+encapsulation dot1q 10
+ip add 10.0.0.6 255.255.255.252
+ip ospf 1 area 0
+
+int f0/0.20
+ip vrf forwarding red
+encapsulation dot1q 20
+ip add 10.0.0.6 255.255.255.252
+ip ospf 2 area 0
+
+int f0/1.10
+ip vrf forwarding green
+encapsulation dot1q 10
+ip add 192.168.2.1 255.255.255.0
+ip ospf 1 area 0
+
+int f0/1.20
+ip vrf forwarding red
+encapsulation dot1q 20
+ip add 192.168.2.1 255.255.255.0
+ip ospf 2 area 0
+&lt;/xmp&gt;
+
+&lt;/details&gt;
+&lt;details&gt;
+ &lt;summary&gt;S1&lt;/summary&gt;
+&lt;xmp&gt;
+# S1
+
+hostname S1
+
+vlan 10
+vlan 20
+
+int f0/5
+switchport trunk encap dot1q
+switchport mode trunk
+
+int f0/9
+switchport mode access
+switchport access vlan 10
+
+int f0/18
+switchport mode access
+switchport access vlan 20
+&lt;/xmp&gt;
+
+&lt;/details&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;VRFs is a very powerful tool when creating complex networking topologies. They really show their usefulness when VRFs run over an MPLS circuit (future lab?). They can isolate networks, separate customers, and prevent route-leaking. There are many creative uses for a protocol that allows multiple routing tables and the ability to have overlapping IP addresses.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 12 May 2018 00:00:00 -0500</pubDate>
+        <link>http://www.maxwenger.com/2018/05/12/vrf-lite/</link>
+        <guid isPermaLink="true">http://www.maxwenger.com/2018/05/12/vrf-lite/</guid>
+        
+        
+        <category>Networking</category>
+        
+        <category>Routing</category>
+        
+        <category>VPN</category>
+        
+      </item>
+    
+      <item>
+        <title>Generic Routing Encapsulation (GRE)</title>
+        <description>&lt;p&gt;GRE is one of many Virtual Private Network (VPN) technologies. VPNs act like a conduit that runs between two (or more… foreshadowing!) routers where traffic can flow through as if the remote router is directly connected, even when its not. Where VPNs really show their hand is when we implement a layer of security on top of our GRE tunnel. This will protect all data flowing between sites.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-it-works&quot;&gt;How it Works&lt;/h2&gt;
+
+&lt;p&gt;From the routers perspective, a GRE tunnel is just like any other interface: it has an IP address, it can be enabled or disabled, a routing protocol can be enabled on it, and anything else a normal interface can do. The only difference: there is no physical “tunnel” cable. It is a virtual link between the two devices.
+The magic of the GRE tunnel is in the GRE header. It takes the original packet, with the original IP header, and adds a GRE header and a new IP header. The IP header is sent to the destination interface of the other side of the tunnel. This “protects”/hides the GRE payload from any routing. Only the new ip header is routed.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-it-looks&quot;&gt;How it Looks&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/img/2018-02-13-generic-routing-encapsulation-gre/how-it-looks.png&quot; alt=&quot;R1 and R2, both connected over a WAN link (192.168.1.0/24); R1 and R2 connected by tunn0 (10.0.0.0/30).&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice how the tunnel interface is listed as any other interface. It has an IP address of its own and is treated as any physical interface.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;R1#show ip interface brief 
+Interface           IP-Address   OK?  Method  Status  Protocol 
+GigabitEthernet0/0  192.168.1.1	 YES  manual  up      up
+Tunnel0             10.0.0.1     YES  manual  up      up
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Notice how there is only one hop. No matter how many hops there will be on the WAN, the other side of the GRE tunnel is only one hop away – the hops in the WAN aren’t even visible. It looks like the other side of the tunnel is just on the other end of a physical interface.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;R1#traceroute 10.0.0.2
+Type escape sequence to abort.
+Tracing the route to 10.0.0.2
+
+  1   10.0.0.2        0 msec    0 msec    0 msec   
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;If we were to examine the IP packet for this demonstration, it would look like this. GRE added a new header to the packet, so it could be routed over the WAN, but once it’s received by R2, the “New IP Header” is removed and sent to the tunnel interface.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/2018-02-13-generic-routing-encapsulation-gre/packet-diagram.png&quot; alt=&quot;IP Payload inside Original IP Header inside GRE header inside New IP Header&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;how-its-configured&quot;&gt;How it’s Configured&lt;/h2&gt;
+&lt;p&gt;Following the theme of “a tunnel is just another interface”, a GRE tunnel is configured right on the tunnel interface.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Configure the tunnel interface&lt;/li&gt;
+  &lt;li&gt;Configure an IP address&lt;/li&gt;
+  &lt;li&gt;Configure the source port/address&lt;/li&gt;
+  &lt;li&gt;Configure the destination address&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;R1(config)#interface tunnel 0
+%LINK-5-CHANGED: Interface Tunnel0, changed state to up
+R1(config-if)#ip address 10.0.0.1 255.255.255.252
+R1(config-if)#tunnel source g0/0
+R1(config-if)#tunnel destination 192.168.1.2
+R1(config-if)#no shutdown
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;It is customary/best practice to configure the tunnel source as a port, and the destination as an IP address. This is to prevent any address changes on the source port effecting the tunnel.
+On the other device, there should be a mirror image of the above configuration. In other words, the tunnel source on R2 should have the address 192.168.1.2, and the tunnel destination address should be configured with the exact address of R1’s GigabitEthernet0/0 interface.
+There are a few other ways a GRE tunnel can operate. The above configuration only supports IPv4 GRE tunnels. To setup an IPv6 tunnel, the tunnel mode command must be issued.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 13 Feb 2018 00:00:00 -0600</pubDate>
+        <link>http://www.maxwenger.com/2018/02/13/generic-routing-encapsulation-gre/</link>
+        <guid isPermaLink="true">http://www.maxwenger.com/2018/02/13/generic-routing-encapsulation-gre/</guid>
+        
+        
+        <category>Networking</category>
+        
+      </item>
+    
+  </channel>
+</rss>
